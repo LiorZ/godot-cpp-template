@@ -5,7 +5,7 @@ import sys
 from methods import print_error
 
 
-libname = "EXTENSION-NAME"
+libname = "bio_molecular_plugin"
 projectdir = "demo"
 
 localEnv = Environment(tools=["default"], PLATFORM="")
@@ -38,6 +38,15 @@ Run the following command to download godot-cpp:
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
 
 env.Append(CPPPATH=["src/"])
+
+gemmi_include_dir = "gemmi/include"
+if os.path.isdir(gemmi_include_dir):
+    env.Append(CPPPATH=[gemmi_include_dir])
+else:
+    print("Warning: gemmi/include not found. Gemmi headers are required to build the extension.")
+
+# Gemmi relies on standard C++ exceptions.
+env["use_exceptions"] = True
 sources = Glob("src/*.cpp")
 
 if env["target"] in ["editor", "template_debug"]:
