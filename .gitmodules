@@ -2,3 +2,6 @@
 	path = godot-cpp
 	url = https://github.com/godotengine/godot-cpp.git
 	branch = 4.3
+[submodule "gemmi"]
+	path = gemmi
+	url = https://github.com/project-gemmi/gemmi.git
