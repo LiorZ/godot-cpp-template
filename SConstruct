@@ -35,15 +35,81 @@ Run the following command to download godot-cpp:
     git submodule update --init --recursive""")
     sys.exit(1)
 
+# Gemmi needs C++ exceptions enabled.
+env["disable_exceptions"] = False
+
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
 
 env.Append(CPPPATH=["src/"])
+# Ensure exception support for Gemmi (godot-cpp disables it by default).
+env.Append(CXXFLAGS=["-fexceptions"])
 
 gemmi_include_dir = "gemmi/include"
 if os.path.isdir(gemmi_include_dir):
     env.Append(CPPPATH=[gemmi_include_dir])
 else:
     print("Warning: gemmi/include not found. Gemmi headers are required to build the extension.")
+
+# Build and statically link Gemmi so the Godot extension doesn't depend on a
+# system-wide Gemmi shared library at runtime.
+gemmi_src_dir = "gemmi/src"
+gemmi_sources = [
+    f"{gemmi_src_dir}/align.cpp",
+    f"{gemmi_src_dir}/assembly.cpp",
+    f"{gemmi_src_dir}/calculate.cpp",
+    f"{gemmi_src_dir}/ccp4.cpp",
+    f"{gemmi_src_dir}/crd.cpp",
+    f"{gemmi_src_dir}/ddl.cpp",
+    f"{gemmi_src_dir}/eig3.cpp",
+    f"{gemmi_src_dir}/fprime.cpp",
+    f"{gemmi_src_dir}/gz.cpp",
+    f"{gemmi_src_dir}/intensit.cpp",
+    f"{gemmi_src_dir}/json.cpp",
+    f"{gemmi_src_dir}/mmcif.cpp",
+    f"{gemmi_src_dir}/mmread_gz.cpp",
+    f"{gemmi_src_dir}/monlib.cpp",
+    f"{gemmi_src_dir}/mtz.cpp",
+    f"{gemmi_src_dir}/mtz2cif.cpp",
+    f"{gemmi_src_dir}/pdb.cpp",
+    f"{gemmi_src_dir}/polyheur.cpp",
+    f"{gemmi_src_dir}/read_cif.cpp",
+    f"{gemmi_src_dir}/resinfo.cpp",
+    f"{gemmi_src_dir}/riding_h.cpp",
+    f"{gemmi_src_dir}/select.cpp",
+    f"{gemmi_src_dir}/sprintf.cpp",
+    f"{gemmi_src_dir}/dssp.cpp",
+    f"{gemmi_src_dir}/symmetry.cpp",
+    f"{gemmi_src_dir}/to_json.cpp",
+    f"{gemmi_src_dir}/to_mmcif.cpp",
+    f"{gemmi_src_dir}/to_pdb.cpp",
+    f"{gemmi_src_dir}/topo.cpp",
+    f"{gemmi_src_dir}/xds_ascii.cpp",
+]
+
+gemmi_zlib_sources = [
+    "gemmi/third_party/zlib/adler32.c",
+    "gemmi/third_party/zlib/crc32.c",
+    "gemmi/third_party/zlib/gzlib.c",
+    "gemmi/third_party/zlib/gzread.c",
+    "gemmi/third_party/zlib/inflate.c",
+    "gemmi/third_party/zlib/inffast.c",
+    "gemmi/third_party/zlib/inftrees.c",
+    "gemmi/third_party/zlib/zutil.c",
+]
+
+gemmi_env = env.Clone()
+gemmi_env.Append(
+    CPPPATH=["gemmi/third_party"],
+    CPPDEFINES=[
+        "GEMMI_BUILD",
+        "NO_GZCOMPRESS=1",
+        "DYNAMIC_CRC_TABLE=1",
+        "Z_HAVE_UNISTD_H=1",
+    ],
+    CCFLAGS=["-fPIC"],
+)
+gemmi_lib = gemmi_env.StaticLibrary("bin/{}/gemmi".format(env["platform"]), gemmi_sources + gemmi_zlib_sources)
+env.Append(LIBS=[gemmi_lib])
 
 # Gemmi relies on standard C++ exceptions.
 env["use_exceptions"] = True

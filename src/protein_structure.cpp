@@ -161,7 +161,7 @@ void ProteinStructure::load_file(const String &path) {
 
 	const std::string native_path = path.utf8().get_data();
 	try {
-		model_data = gemmi::read_structure(native_path);
+		model_data = gemmi::read_structure_file(native_path);
 	} catch (const std::exception &e) {
 		UtilityFunctions::printerr(vformat("ProteinStructure: Failed to parse structure: %s", String(e.what())));
 		return;

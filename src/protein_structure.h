@@ -1,13 +1,14 @@
 #pragma once
 
 #include <gemmi/mmread.hpp>
-#include <gemmi/structure.hpp>
+#include <gemmi/model.hpp>
 
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/classes/multi_mesh.hpp>
 #include <godot_cpp/classes/multi_mesh_instance3d.hpp>
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/classes/surface_tool.hpp>
+#include <godot_cpp/core/type_info.hpp>
 #include <godot_cpp/variant/color.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/vector3.hpp>
@@ -64,3 +65,5 @@ private:
 };
 
 } // namespace godot
+
+VARIANT_ENUM_CAST(godot::ProteinStructure::RepresentationMode);
