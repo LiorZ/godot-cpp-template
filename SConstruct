@@ -3,10 +3,18 @@ import os
 import sys
 
 from methods import print_error
+from SCons.Script import ARGUMENTS
 
 
-libname = "bio_molecular_plugin"
+libname = "godotmol"
 projectdir = "demo"
+
+# Accept friendly target aliases.
+_user_target = ARGUMENTS.get("target", "")
+if _user_target == "release":
+    ARGUMENTS["target"] = "template_release"
+elif _user_target == "debug":
+    ARGUMENTS["target"] = "template_debug"
 
 localEnv = Environment(tools=["default"], PLATFORM="")
 
@@ -122,9 +130,11 @@ if env["target"] in ["editor", "template_debug"]:
     except AttributeError:
         print("Not including class reference as we're targeting a pre-4.3 baseline.")
 
+# Normalize suffix to drop template markers.
 # .dev doesn't inhibit compatibility, so we don't need to key it.
 # .universal just means "compatible with all relevant arches" so we don't need to key it.
-suffix = env['suffix'].replace(".dev", "").replace(".universal", "")
+suffix = env["suffix"].replace(".dev", "").replace(".universal", "")
+suffix = suffix.replace(".template_debug", ".debug").replace(".template_release", ".release")
 
 lib_filename = "{}{}{}{}".format(env.subst('$SHLIBPREFIX'), libname, suffix, env.subst('$SHLIBSUFFIX'))
 
